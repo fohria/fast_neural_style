@@ -1,21 +1,97 @@
-# PyTorch Examples
-![github CI](https://github.com/pytorch/pytorch-examples/workflows/.github/workflows/main.yml/badge.svg)
+# fast-neural-style
 
-A repository showcasing examples of using [PyTorch](https://github.com/pytorch/pytorch)
+This fork adds functionality to stylize many images at the same time, for example frames extracted from video.
 
-- [Image classification (MNIST) using Convnets](mnist)
-- [Word level Language Modeling using LSTM RNNs](word_language_model)
-- [Training Imagenet Classifiers with Residual Networks](imagenet)
-- [Generative Adversarial Networks (DCGAN)](dcgan)
-- [Variational Auto-Encoders](vae)
-- [Superresolution using an efficient sub-pixel convolutional neural network](super_resolution)
-- [Hogwild training of shared ConvNets across multiple processes on MNIST](mnist_hogwild)
-- [Training a CartPole to balance in OpenAI Gym with actor-critic](reinforcement_learning)
-- [Natural Language Inference (SNLI) with GloVe vectors, LSTMs, and torchtext](snli)
-- [Time sequence prediction - use an LSTM to learn Sine waves](time_sequence_prediction)
-- [Implement the Neural Style Transfer algorithm on images](fast_neural_style)
-- [Several examples illustrating the C++ Frontend](cpp)
+## usage
 
-Additionally, a list of good examples hosted in their own repositories:
+### installation
 
-- [Neural Machine Translation using sequence-to-sequence RNN with attention (OpenNMT)](https://github.com/OpenNMT/OpenNMT-py)
+Python is of course needed :)
+
+Simplest is using anaconda to create a new environment and install pytorch there:
+
+```bash
+conda create -n styletransfer
+conda activate styletransfer
+conda install pytorch torchvision -c pytorch
+conda install pillow matplotlib
+```
+
+if you have a CUDA enabled graphics card, check the [pytorch site](https://pytorch.org) for alternate installation command for pytorch.
+
+**NOTE** CUDA is highly recommended as it's much faster!
+
+### usage
+
+1. Place the images you want to style in the `inputs` directory (try with one first to see how long it takes)
+2. run: `python fast.py`
+3. enjoy!
+
+For more information, please check out my [blog post](https://gamescapad.es/planet-ghibli-neural-style-transfer-planet-earth-studio-ghibli-part2/)
+
+The three included models are:
+nausicaa - default style-weight (1e10)
+nausicaa2 - style-weight=1e11
+nausicaa3 - style-weight=5e10
+
+
+---
+original readme follows:
+
+# fast-neural-style :city_sunrise: :rocket:
+This repository contains a pytorch implementation of an algorithm for artistic style transfer. The algorithm can be used to mix the content of an image with the style of another image. For example, here is a photograph of a door arch rendered in the style of a stained glass painting.
+
+The model uses the method described in [Perceptual Losses for Real-Time Style Transfer and Super-Resolution](https://arxiv.org/abs/1603.08155) along with [Instance Normalization](https://arxiv.org/pdf/1607.08022.pdf). The saved-models for examples shown in the README can be downloaded from [here](https://www.dropbox.com/s/lrvwfehqdcxoza8/saved_models.zip?dl=0).
+
+<p align="center">
+    <img src="images/style-images/mosaic.jpg" height="200px">
+    <img src="images/content-images/amber.jpg" height="200px">
+    <img src="images/output-images/amber-mosaic.jpg" height="440px">
+</p>
+
+## Requirements
+The program is written in Python, and uses [pytorch](http://pytorch.org/), [scipy](https://www.scipy.org). A GPU is not necessary, but can provide a significant speed up especially for training a new model. Regular sized images can be styled on a laptop or desktop using saved models.
+
+## Usage
+Stylize image
+```
+python neural_style/neural_style.py eval --content-image </path/to/content/image> --model </path/to/saved/model> --output-image </path/to/output/image> --cuda 0
+```
+* `--content-image`: path to content image you want to stylize.
+* `--model`: saved model to be used for stylizing the image (eg: `mosaic.pth`)
+* `--output-image`: path for saving the output image.
+* `--content-scale`: factor for scaling down the content image if memory is an issue (eg: value of 2 will halve the height and width of content-image)
+* `--cuda`: set it to 1 for running on GPU, 0 for CPU.
+
+Train model
+```bash
+python neural_style/neural_style.py train --dataset </path/to/train-dataset> --style-image </path/to/style/image> --save-model-dir </path/to/save-model/folder> --epochs 2 --cuda 1
+```
+
+There are several command line arguments, the important ones are listed below
+* `--dataset`: path to training dataset, the path should point to a folder containing another folder with all the training images. I used COCO 2014 Training images dataset [80K/13GB] [(download)](http://mscoco.org/dataset/#download).
+* `--style-image`: path to style-image.
+* `--save-model-dir`: path to folder where trained model will be saved.
+* `--cuda`: set it to 1 for running on GPU, 0 for CPU.
+
+Refer to ``neural_style/neural_style.py`` for other command line arguments. For training new models you might have to tune the values of `--content-weight` and `--style-weight`. The mosaic style model shown above was trained with `--content-weight 1e5` and `--style-weight 1e10`. The remaining 3 models were also trained with similar order of weight parameters with slight variation in the `--style-weight` (`5e10` or `1e11`).
+
+## Models
+
+Models for the examples shown below can be downloaded from [here](https://www.dropbox.com/s/lrvwfehqdcxoza8/saved_models.zip?dl=0) or by running the script ``download_saved_models.py``.
+
+<div align='center'>
+  <img src='images/content-images/amber.jpg' height="174px">		
+</div>
+
+<div align='center'>
+  <img src='images/style-images/mosaic.jpg' height="174px">
+  <img src='images/output-images/amber-mosaic.jpg' height="174px">
+  <img src='images/output-images/amber-candy.jpg' height="174px">
+  <img src='images/style-images/candy.jpg' height="174px">
+  <br>
+  <img src='images/style-images/rain-princess-cropped.jpg' height="174px">
+  <img src='images/output-images/amber-rain-princess.jpg' height="174px">
+  <img src='images/output-images/amber-udnie.jpg' height="174px">
+  <img src='images/style-images/udnie.jpg' height="174px">
+</div>
